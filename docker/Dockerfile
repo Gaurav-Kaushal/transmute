@@ -14,11 +14,11 @@ FROM python:3.13-slim
 ARG BUILD_VERSION="dev"
 
 # https://github.com/kovidgoyal/calibre/releases
-ARG CALIBRE_VERSION="9.8.0"
+ARG CALIBRE_VERSION="9.9.0"
 # https://github.com/jgm/pandoc/releases
 ARG PANDOC_VERSION="3.9.0.2"
 # https://github.com/jgraph/drawio-desktop/releases
-ARG DRAWIO_VERSION="30.0.2"
+ARG DRAWIO_VERSION="30.0.4"
 
 # Set working directory
 WORKDIR /app
