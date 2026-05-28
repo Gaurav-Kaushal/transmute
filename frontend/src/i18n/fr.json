@@ -148,7 +148,7 @@
     "cleanupTtlDescription": "Nettoyer automatiquement les uploads et les conversions après un temps donné",
     "cleanupAdminOnly": "Géré par un administrateur",
     "cleanupInterval": "Intervalle de nettoyage",
-    "cleanupIntervalDescription": "Minutes avant que les uploads & les conversions soient nettoyés",
+    "cleanupIntervalDescription": "Minutes avant que les uploads et les conversions soient nettoyés",
     "min": "min",
     "saveChanges": "Enregistrer les changements",
     "saved": "Enregistré !",
