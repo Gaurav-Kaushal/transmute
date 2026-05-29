@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { FaCheckSquare, FaSquare, FaSort, FaSortUp, FaSortDown, FaDownload, FaTrash, FaEye, FaTimes, FaRedo, FaCheckCircle, FaSpinner, FaHourglassHalf, FaTimesCircle, FaBan } from 'react-icons/fa'
 import { useTranslation } from 'react-i18next'
+import { formatUtcTimestamp, parseUtcTimestamp } from '../utils/datetime'
 import { stripExtension } from '../utils/filename'
 import FormatDropdown from './FormatDropdown'
 
@@ -129,7 +130,7 @@ function FileTable({
       case 'date': {
         const dateA = a.conversion?.created_at || a.file.created_at || ''
         const dateB = b.conversion?.created_at || b.file.created_at || ''
-        cmp = new Date(dateA).getTime() - new Date(dateB).getTime()
+        cmp = (parseUtcTimestamp(dateA)?.getTime() ?? 0) - (parseUtcTimestamp(dateB)?.getTime() ?? 0)
         break
       }
     }
@@ -307,7 +308,7 @@ function FileTable({
                   {(() => {
                     const size = formatFileSize(row.conversion?.size_bytes ?? row.file.size_bytes)
                     const dateStr = (row.file.created_at || row.conversion?.created_at)
-                      ? new Date(row.conversion?.created_at || row.file.created_at!).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+                      ? formatUtcTimestamp(row.conversion?.created_at || row.file.created_at!, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
                       : null
                     const quality = !isPending && row.conversion?.quality ? row.conversion.quality : null
                     return (
@@ -395,7 +396,7 @@ function FileTable({
               {showDate && (
                 <td className="hidden lg:table-cell px-4 py-3 text-text-muted whitespace-nowrap">
                   {(row.file.created_at || row.conversion?.created_at) &&
-                    new Date(row.conversion?.created_at || row.file.created_at!).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+                    formatUtcTimestamp(row.conversion?.created_at || row.file.created_at!, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
                   }
                 </td>
               )}

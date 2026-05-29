@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from '../AuthContext'
 import PasswordField from '../components/PasswordField'
 import { apiJson } from '../utils/api'
+import { formatUtcDate } from '../utils/datetime'
 
 interface ApiKey {
   id: string
@@ -219,7 +220,7 @@ function Account() {
                   <div>
                     <span className="text-sm font-medium text-text">{key.name}</span>
                     <span className="ml-3 text-xs text-text-muted font-mono">{key.prefix}...</span>
-                    {key.created_at && <span className="ml-3 text-xs text-text-muted">{new Date(key.created_at).toLocaleDateString()}</span>}
+                    {key.created_at && <span className="ml-3 text-xs text-text-muted">{formatUtcDate(key.created_at)}</span>}
                   </div>
                   <button onClick={() => handleDeleteKey(key.id)} className="p-2 rounded-lg hover:bg-primary/20 text-text-muted hover:text-primary-light transition" title={t('apiKeys.deleteKey')}>
                     <FaTrash className="text-sm" />

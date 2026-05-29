@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import FileTable, { FileInfo, ConversionInfo, FileTableRow, JobStatus } from '../components/FileTable'
 import { isPreviewable } from '../components/previewUtils'
 import { authFetch as fetch } from '../utils/api'
+import { parseUtcTimestamp } from '../utils/datetime'
 import { downloadBlob } from '../utils/download'
 import { stripExtension } from '../utils/filename'
 import { cancelJob, deleteJob, listJobs, retryJob, isTerminalJobStatus, type ConversionJob } from '../utils/jobs'
@@ -240,8 +241,8 @@ function History() {
   const jobRows: FileTableRow[] = jobs
     .slice()
     .sort((a, b) => {
-      const da = a.created_at ? new Date(a.created_at).getTime() : 0
-      const db = b.created_at ? new Date(b.created_at).getTime() : 0
+      const da = parseUtcTimestamp(a.created_at)?.getTime() ?? 0
+      const db = parseUtcTimestamp(b.created_at)?.getTime() ?? 0
       return db - da
     })
     .map(job => {
