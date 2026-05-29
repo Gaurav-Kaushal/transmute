@@ -15,10 +15,16 @@ ARG BUILD_VERSION="dev"
 
 # https://github.com/kovidgoyal/calibre/releases
 ARG CALIBRE_VERSION="9.9.0"
+ARG CALIBRE_SHA_AMD64="5ae7b2956aa85e2432b3e3b92bf74c367acdde658f9137ce45ef0b1ff4969a38"
+ARG CALIBRE_SHA_ARM64="2c28c6764cd6c8152596b801e8051b05818f2d3ca15090e6d242aac309c84bf8"
 # https://github.com/jgm/pandoc/releases
 ARG PANDOC_VERSION="3.9.0.2"
+ARG PANDOC_SHA_AMD64="a69abfababda8a56969a254b09f9553a7be89ddec00d4e0fe9fd585d71a67508"
+ARG PANDOC_SHA_ARM64="b6d21e8f9c3b15744f5a7ab40248019157ed7793875dbe0383d4c82ff572b528"
 # https://github.com/jgraph/drawio-desktop/releases
 ARG DRAWIO_VERSION="30.0.4"
+ARG DRAWIO_SHA_AMD64="c2da34d702e01855af9c9c60484cb9a4984b87f6811a195fcc5a2ff5b533033a"
+ARG DRAWIO_SHA_ARM64="2036f92e193162c260df4f8feb4434680efabfa0f5e17201533c67c28b123b15"
 
 # Set working directory
 WORKDIR /app
@@ -58,6 +64,17 @@ RUN apt-get update && \
     libreoffice-common \
     && rm -rf /var/lib/apt/lists/*
 
+RUN printf '%s\n' \
+    '#!/bin/sh' \
+    'set -eu' \
+    'expected_sha="$1"' \
+    'artifact_path="$2"' \
+    'artifact_name="$3"' \
+    '[ -n "$expected_sha" ] || { echo "Missing SHA256 for ${artifact_name}" >&2; exit 1; }' \
+    'echo "${expected_sha}  ${artifact_path}" | sha256sum -c -' \
+    > /usr/local/bin/verify-sha256 && \
+    chmod +x /usr/local/bin/verify-sha256
+
 # Inkscape's EPS import extension (ps_input.py) requires numpy and lxml
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -70,13 +87,14 @@ RUN apt-get update && \
 # Install Pandoc from upstream GitHub releases to avoid stale distro packages.
 RUN ARCH="${TARGETARCH:-$(dpkg --print-architecture)}" && \
     case "$ARCH" in \
-      amd64) PANDOC_ARCH="amd64" ;; \
-      arm64) PANDOC_ARCH="arm64" ;; \
+            amd64) PANDOC_ARCH="amd64"; PANDOC_SHA="$PANDOC_SHA_AMD64" ;; \
+            arm64) PANDOC_ARCH="arm64"; PANDOC_SHA="$PANDOC_SHA_ARM64" ;; \
       *) echo "Unsupported architecture for pandoc: $ARCH" >&2; exit 1 ;; \
     esac && \
     PANDOC_URL="https://github.com/jgm/pandoc/releases/download/${PANDOC_VERSION}/pandoc-${PANDOC_VERSION}-linux-${PANDOC_ARCH}.tar.gz" && \
     wget --tries=3 --waitretry=5 --retry-connrefused \
-         "$PANDOC_URL" -O /tmp/pandoc.tar.gz && \
+            "$PANDOC_URL" -O /tmp/pandoc.tar.gz && \
+        /usr/local/bin/verify-sha256 "$PANDOC_SHA" /tmp/pandoc.tar.gz pandoc && \
     tar -xzf /tmp/pandoc.tar.gz -C /tmp && \
     cp /tmp/pandoc-${PANDOC_VERSION}/bin/pandoc /usr/local/bin/pandoc && \
     chmod +x /usr/local/bin/pandoc && \
@@ -86,13 +104,14 @@ RUN ARCH="${TARGETARCH:-$(dpkg --print-architecture)}" && \
 # Install Draw.io from upstream GitHub releases to avoid stale distro packages.
 RUN ARCH="${TARGETARCH:-$(dpkg --print-architecture)}" && \
     case "$ARCH" in \
-      amd64) DRAWIO_ARCH="amd64" ;; \
-      arm64) DRAWIO_ARCH="arm64" ;; \
+            amd64) DRAWIO_ARCH="amd64"; DRAWIO_SHA="$DRAWIO_SHA_AMD64" ;; \
+            arm64) DRAWIO_ARCH="arm64"; DRAWIO_SHA="$DRAWIO_SHA_ARM64" ;; \
       *) echo "Unsupported architecture for drawio: $ARCH" >&2; exit 1 ;; \
     esac && \
     DRAWIO_URL="https://github.com/jgraph/drawio-desktop/releases/download/v${DRAWIO_VERSION}/drawio-${DRAWIO_ARCH}-${DRAWIO_VERSION}.deb"; \
     wget --tries=3 --waitretry=5 --retry-connrefused \
-         "$DRAWIO_URL" -O /tmp/drawio.deb && \
+            "$DRAWIO_URL" -O /tmp/drawio.deb && \
+        /usr/local/bin/verify-sha256 "$DRAWIO_SHA" /tmp/drawio.deb drawio && \
     apt-get update && apt-get install -y /tmp/drawio.deb && \
     rm /tmp/drawio.deb && \
     rm -rf /var/lib/apt/lists/*
@@ -100,13 +119,14 @@ RUN ARCH="${TARGETARCH:-$(dpkg --print-architecture)}" && \
 # Install Calibre from upstream GitHub releases to avoid stale distro packages.
 RUN ARCH="${TARGETARCH:-$(dpkg --print-architecture)}" && \
     case "$ARCH" in \
-      amd64) CALIBRE_ARCH="x86_64" ;; \
-      arm64) CALIBRE_ARCH="arm64" ;; \
+            amd64) CALIBRE_ARCH="x86_64"; CALIBRE_SHA="$CALIBRE_SHA_AMD64" ;; \
+            arm64) CALIBRE_ARCH="arm64"; CALIBRE_SHA="$CALIBRE_SHA_ARM64" ;; \
       *) echo "Unsupported architecture for calibre: $ARCH" >&2; exit 1 ;; \
     esac && \
     CALIBRE_URL="https://github.com/kovidgoyal/calibre/releases/download/v${CALIBRE_VERSION}/calibre-${CALIBRE_VERSION}-${CALIBRE_ARCH}.txz" && \
     wget --tries=3 --waitretry=5 --retry-connrefused \
-         "$CALIBRE_URL" -O /tmp/calibre.txz && \
+            "$CALIBRE_URL" -O /tmp/calibre.txz && \
+        /usr/local/bin/verify-sha256 "$CALIBRE_SHA" /tmp/calibre.txz calibre && \
     mkdir -p /opt/calibre && \
     tar -xJf /tmp/calibre.txz -C /opt/calibre && \
     ln -sf /opt/calibre/ebook-convert /usr/bin/ebook-convert && \
