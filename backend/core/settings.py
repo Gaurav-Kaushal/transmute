@@ -65,6 +65,7 @@ class Settings(BaseSettings):
     oidc_client_id: str = ""
     oidc_client_secret: str = ""
     oidc_display_name: str = "SSO"
+    oidc_username_claim: str = "preferred_username"
     oidc_auto_create_users: bool = True
     oidc_auto_launch: bool = False  # If True, automatically redirect to OIDC login when accessing /auth
 
@@ -88,10 +89,10 @@ class Settings(BaseSettings):
     port: int = 3313
     api_server_url: str | None = None
 
-    @field_validator("oidc_issuer_url", "oidc_internal_url", "app_url", mode="before")
+    @field_validator("oidc_issuer_url", "oidc_internal_url", "app_url", "oidc_username_claim", mode="before")
     @classmethod
     def _normalize_url_env(cls, value: str) -> str:
-        """Strip whitespace and accidental surrounding quotes from URL settings."""
+        """Strip whitespace and accidental surrounding quotes from string settings."""
         if not isinstance(value, str):
             return value
 

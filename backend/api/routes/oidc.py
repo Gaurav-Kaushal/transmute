@@ -202,7 +202,7 @@ async def oidc_callback(
             # Auto-provision a new local account.
             # Mirror the bootstrap rule: the very first user becomes admin.
             role = UserRole.ADMIN.value if not user_db.has_users() else UserRole.MEMBER.value
-            preferred = userinfo.get("preferred_username") or email or subject
+            preferred = _coerce_username_claim(userinfo.get(settings.oidc_username_claim)) or email or subject
             username = _unique_username(user_db, preferred)
             user = user_db.insert_user({
                 "uuid": str(uuid.uuid4()),
@@ -274,6 +274,26 @@ def _unusable_password() -> str:
     but can never validate.
     """
     return "!oidc-no-password"
+
+
+def _coerce_username_claim(value) -> str | None:
+    """Convert an OIDC claim into a usable username seed string."""
+    if value is None:
+        return None
+
+    if isinstance(value, str):
+        normalized = value.strip()
+        return normalized or None
+
+    if isinstance(value, (list, tuple, set)):
+        parts = [str(item).strip() for item in value if str(item).strip()]
+        return ".".join(parts) or None
+
+    if isinstance(value, dict):
+        return None
+
+    normalized = str(value).strip()
+    return normalized or None
 
 
 def _unique_username(user_db: UserDB, base: str) -> str:

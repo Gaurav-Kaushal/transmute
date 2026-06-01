@@ -66,6 +66,15 @@ def test_quoted_url_settings_are_normalized(tmp_path):
     assert s.oidc_internal_url == "https://idp.internal/application/o/transmute/"
 
 
+def test_oidc_username_claim_is_normalized(tmp_path):
+    s = Settings(
+        data_dir=tmp_path / "data",
+        oidc_username_claim='  "preferred_username"  ',
+    )
+
+    assert s.oidc_username_claim == "preferred_username"
+
+
 def test_get_settings_returns_same_instance():
     get_settings.cache_clear()
     try:
