@@ -4,6 +4,7 @@ from .pandas_convert import PandasConverter
 from .drawio_convert import DrawioConverter
 from .pypandoc_convert import PyPandocConverter
 from .pymupdf_convert import PyMuPDFConverter
+from .pdf2docx_convert import PDF2DOCXConverter
 from .pysubs2_convert import PySubs2Converter
 from .fonttools_convert import FonttoolsConverter
 from .libreoffice_convert import LibreOfficeConverter
@@ -25,6 +26,7 @@ __all__ = [
     "DrawioConverter", 
     "PyPandocConverter", 
     "PyMuPDFConverter", 
+    "PDF2DOCXConverter",
     "PySubs2Converter", 
     "FonttoolsConverter", 
     "LibreOfficeConverter", 
