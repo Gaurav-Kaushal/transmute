@@ -2,8 +2,8 @@
   "@context": "https://openvex.dev/ns/v0.2.0",
   "@id": "https://github.com/transmute-app/transmute/blob/main/docs/other/vex.json",
   "author": "transmute-app",
-  "timestamp": "2026-06-01T00:00:00Z",
-  "version": 7,
+  "timestamp": "2026-06-05T00:00:00Z",
+  "version": 8,
   "statements": [
     {
       "vulnerability": { 
@@ -215,6 +215,42 @@
       "status": "not_affected",
       "justification": "vulnerable_code_not_in_execute_path",
       "impact_statement": "Transmute does not use Mbed TLS or TF-PSA-Crypto for HTTPS, token generation, or random number generation. Its outbound HTTP client is implemented in Python via backend/downloaders/http_downloader.py using httpx and Python's ssl stack, and application secrets are generated with Python's secrets module. The vulnerable Mbed TLS PRNG seed-cloning path is not in the execute path of Transmute and cannot be reached by an attacker through the application."
+    },
+    {
+      "vulnerability": {
+        "@id": "CVE-2026-7010"
+      },
+      "products": [
+        {
+          "@id": "pkg:docker/transmute-app/transmute?repository_url=ghcr.io",
+          "subcomponents": [
+            {
+              "@id": "pkg:deb/debian/perl@5.40.1-6?os_distro=trixie\u0026os_name=debian\u0026os_version=13"
+            }
+          ]
+        }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_in_execute_path",
+      "impact_statement": "Transmute does not use Perl HTTP::Tiny to issue outbound requests. Its network download path is implemented in Python in backend/downloaders/http_downloader.py using httpx, and the application does not pass attacker-controlled URLs, methods, or headers to Perl HTTP::Tiny. The vulnerable HTTP::Tiny request-smuggling path is not in the execute path of Transmute and cannot be reached by an attacker through the application."
+    },
+    {
+      "vulnerability": {
+        "@id": "CVE-2026-8829"
+      },
+      "products": [
+        {
+          "@id": "pkg:docker/transmute-app/transmute?repository_url=ghcr.io",
+          "subcomponents": [
+            {
+              "@id": "pkg:deb/debian/libhtml-parser-perl@3.83-1+b2?os_distro=trixie\u0026os_name=debian\u0026os_version=13"
+            }
+          ]
+        }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_in_execute_path",
+      "impact_statement": "Transmute does not use Perl HTML::Entities or HTML::Parser to decode attacker-controlled HTML. Its HTML handling is implemented in Python, including email HTML processing in backend/converters/email_convert.py via lxml.html. The vulnerable HTML::Entities _decode_entities use-after-free path is not in the execute path of Transmute and cannot be reached by an attacker through the application."
     },
     {
       "vulnerability": {
